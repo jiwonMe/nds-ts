@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>nds-ts</title>
+    <meta name="description" content="Write Nintendo DS games in TypeScript, preview them in a browser, and build real .nds ROMs from the same compiled script." />
+    <meta name="theme-color" content="#eef1f5" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect x='2' y='0' width='12' height='16' rx='2' fill='%23e8ebef'/%3E%3Crect x='3' y='1' width='10' height='6' fill='%2316181d'/%3E%3Crect x='3' y='9' width='10' height='6' fill='%2316181d'/%3E%3Crect x='7' y='3' width='2' height='2' fill='%23d6008f'/%3E%3Crect x='2' y='7' width='12' height='2' fill='%23b9c0c9'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="nav">
+      <div class="wrap nav-inner">
+        <a class="brand" href="#top" aria-label="nds-ts, back to top"><span data-pixel-text="NDS-TS"></span></a>
+        <nav class="nav-links" aria-label="Sections">
+          <a href="#editor">Editor</a>
+          <a href="#how">How it works</a>
+          <a href="#api">API</a>
+          <a href="#limits">Limits</a>
+        </nav>
+        <a class="nav-github" href="https://github.com/jiwonMe/nds-ts" data-icon="github">GitHub</a>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top" aria-labelledby="hero-title">
+        <div class="wrap hero-grid">
+          <div class="hero-copy">
+            <h1 id="hero-title">Nintendo DS games in TypeScript.</h1>
+            <p class="lede">Preview them in the browser, then build a real <code>.nds</code> ROM. Both run the same compiled ES5 script.</p>
+            <div class="cta-row">
+              <a class="button button-primary" href="#start">Get started</a>
+              <a class="button" href="#editor" data-icon="code">Edit a cartridge</a>
+            </div>
+          </div>
+
+          <div class="hero-carts">
+            <h2 class="rack-title" id="rack-title">Insert a cartridge</h2>
+            <ul class="rack" id="rack" aria-labelledby="rack-title"></ul>
+          </div>
+
+          <div class="hero-device" id="device-host">
+            <div class="ds" id="console" tabindex="0" role="group" aria-label="nds-ts handheld console" aria-describedby="keyboard-hint" data-lid="closed" data-power="off" data-layout="wide">
+              <div class="ds-lid">
+                <div class="ds-lid-face">
+                  <span class="ds-speaker" aria-hidden="true"></span>
+                  <div class="ds-screen ds-screen-top">
+                    <canvas id="screen-top" width="256" height="192" aria-label="Top screen"></canvas>
+                  </div>
+                  <span class="ds-speaker" aria-hidden="true"></span>
+                  <span class="ds-lid-brand" data-pixel-text="NDS-TS" aria-hidden="true"></span>
+                </div>
+                <div class="ds-lid-back" aria-hidden="true"><span data-pixel-text="NDS-TS"></span></div>
+              </div>
+              <div class="ds-hinge">
+                <span class="ds-mic" aria-hidden="true"></span>
+                <span class="ds-leds" aria-hidden="true"><i class="ds-led" data-led="power"></i><i class="ds-led" data-led="charge"></i></span>
+              </div>
+              <div class="ds-base">
+                <button class="ds-shoulder ds-shoulder-l" data-button="l" type="button" tabindex="-1" aria-label="L button">L</button>
+                <button class="ds-shoulder ds-shoulder-r" data-button="r" type="button" tabindex="-1" aria-label="R button">R</button>
+                <div class="ds-dpad" id="dpad" aria-label="Direction pad">
+                  <button data-button="up" type="button" tabindex="-1" aria-label="Up"></button>
+                  <button data-button="left" type="button" tabindex="-1" aria-label="Left"></button>
+                  <button data-button="right" type="button" tabindex="-1" aria-label="Right"></button>
+                  <button data-button="down" type="button" tabindex="-1" aria-label="Down"></button>
+                  <span class="ds-dpad-hub" aria-hidden="true"></span>
+                </div>
+                <div class="ds-screen ds-screen-bottom">
+                  <canvas id="screen-bottom" width="256" height="192" aria-label="Touch screen"></canvas>
+                </div>
+                <div class="ds-face" aria-label="Face buttons">
+                  <button data-button="x" type="button" tabindex="-1">X</button>
+                  <button data-button="y" type="button" tabindex="-1">Y</button>
+                  <button data-button="a" type="button" tabindex="-1">A</button>
+                  <button data-button="b" type="button" tabindex="-1">B</button>
+                </div>
+                <div class="ds-meta">
+                  <button data-button="start" type="button" tabindex="-1" aria-label="Start"></button><span aria-hidden="true">START</span>
+                  <button data-button="select" type="button" tabindex="-1" aria-label="Select"></button><span aria-hidden="true">SELECT</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="console-bar">
+              <p class="console-now"><span class="console-dot" aria-hidden="true"></span><span id="now-playing">Starting up</span></p>
+              <dl class="console-stats" aria-label="Live engine figures">
+                <div><dt>Ticks/s</dt><dd id="stat-rate">0</dd></div>
+                <div><dt>Quads</dt><dd><span id="stat-quads">0</span><small>/1500</small></dd></div>
+                <div><dt>Draw</dt><dd><span id="stat-draw">0</span><small>µs</small></dd></div>
+              </dl>
+              <div class="console-actions">
+                <button class="chip" id="sound-toggle" type="button" aria-pressed="false" data-icon="volumeX">Sound off</button>
+                <button class="chip" id="lid-toggle" type="button" aria-pressed="false">Close lid</button>
+                <button class="chip" id="reset-console" type="button" data-icon="reload">Reset</button>
+              </div>
+            </div>
+            <div class="console-help">
+              <ul class="controls" id="controls" aria-label="Controls for this cartridge"></ul>
+              <p class="keyboard-hint" id="keyboard-hint">Click the console to play with your keyboard.</p>
+            </div>
+            <p class="console-error" id="console-error" role="alert" hidden></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section editor-section" id="editor" aria-labelledby="editor-title">
+        <div class="wrap">
+          <header class="section-head">
+            <h2 id="editor-title">Change the code. Reboot the console.</h2>
+            <p>This is the inserted cartridge's real source. Edits compile in your browser under the same ES5 rules as the command-line build, then run on the console above.</p>
+          </header>
+          <div class="ide">
+            <div class="ide-bar">
+              <div class="ide-tabs" role="tablist" aria-label="Files">
+                <button class="ide-tab" role="tab" id="tab-source" aria-selected="true" aria-controls="ide-view" data-view="source" type="button">main.ts</button>
+                <button class="ide-tab" role="tab" id="tab-script" aria-selected="false" aria-controls="ide-view" data-view="script" type="button" tabindex="-1">game.js</button>
+                <button class="ide-tab" role="tab" id="tab-header" aria-selected="false" aria-controls="ide-view" data-view="header" type="button" tabindex="-1">script_gen.h</button>
+              </div>
+              <span class="ide-path" id="ide-path">examples/hinge-breakout/main.ts</span>
+            </div>
+            <div class="ide-body">
+              <div class="code" id="ide-view" role="tabpanel" aria-labelledby="tab-source">
+                <div class="code-gutter" id="code-gutter" aria-hidden="true"></div>
+                <div class="code-scroll" id="code-scroll">
+                  <pre class="code-highlight" id="code-highlight" aria-hidden="true"></pre>
+                  <textarea class="code-input" id="code-input" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off" aria-label="Cartridge source code"></textarea>
+                </div>
+              </div>
+              <aside class="ide-side" aria-label="Build and run">
+                <div class="mini" id="mini" tabindex="0" role="group" aria-label="Console screens. Click them to play with your keyboard.">
+                  <canvas id="mini-top" width="256" height="192" aria-label="Top screen"></canvas>
+                  <canvas id="mini-bottom" width="256" height="192" aria-label="Touch screen"></canvas>
+                </div>
+                <div class="build" id="build" data-state="ready">
+                  <p class="build-state" id="build-state">Compiled by the ROM toolchain</p>
+                  <dl class="build-figures">
+                    <div><dt>TypeScript</dt><dd id="figure-lines">0 lines</dd></div>
+                    <div><dt>ES5 output</dt><dd id="figure-bytes">0 bytes</dd></div>
+                  </dl>
+                </div>
+                <div class="ide-actions">
+                  <button class="button button-primary" id="run-code" type="button" data-icon="play">Run on the console</button>
+                  <button class="button" id="revert-code" type="button" data-icon="undo">Reset code</button>
+                </div>
+                <div class="tweaks">
+                  <h3 class="tweaks-title">Try a change</h3>
+                  <div class="tweak-list" id="tweaks"></div>
+                </div>
+                <ol class="diagnostics" id="diagnostics" aria-live="polite"></ol>
+                <p class="ide-note">Shortcut: <kbd>Ctrl</kbd> + <kbd>Enter</kbd> runs the code.</p>
+              </aside>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section flow-section" id="how" aria-labelledby="how-title">
+        <div class="wrap">
+          <header class="section-head">
+            <h2 id="how-title">One script, two targets.</h2>
+            <p>The TypeScript compiler runs on your computer. What reaches the console is plain ES5 text, run by your browser on this page or by the Duktape interpreter inside the ROM.</p>
+          </header>
+          <div class="flow">
+            <ol class="flow-trunk">
+              <li class="flow-node">
+                <code>main.ts</code>
+                <p>Your game: one global TypeScript script.</p>
+              </li>
+              <li class="flow-node">
+                <code>tsc</code>
+                <p>Type-checks against ES5 and the SDK. Imports, <code>Map</code> and <code>Promise</code> are rejected here.</p>
+              </li>
+              <li class="flow-node flow-node-key">
+                <code>game.js</code>
+                <p><b id="flow-bytes">0</b> bytes of ES5 for the cartridge in the console.</p>
+              </li>
+            </ol>
+            <div class="flow-lanes">
+              <div class="flow-lane">
+                <h3>In this browser</h3>
+                <ol>
+                  <li>Canvas 2D paints both screens, Web Audio plays the tone.</li>
+                  <li>Colors are cut to RGB15 and text uses the same 3×5 font.</li>
+                  <li>The top screen keeps the DS limit of 1500 quads a frame.</li>
+                </ol>
+              </div>
+              <div class="flow-lane flow-lane-ds">
+                <h3>On a Nintendo DS</h3>
+                <ol>
+                  <li><code>script_gen.h</code> embeds the same bytes as a C array.</li>
+                  <li>Duktape 2.7 runs them in a 512 KiB heap on the ARM9.</li>
+                  <li>libnds draws the top screen with 3D quads, the bottom as a bitmap.</li>
+                  <li>BlocksDS links a real <code>.nds</code> ROM inside Docker.</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section measured-section" id="measured" aria-labelledby="measured-title">
+        <div class="wrap">
+          <header class="section-head">
+            <p class="eyebrow">melonDS 0.9.3 libretro core</p>
+            <h2 id="measured-title">Measured on an emulated DS.</h2>
+          </header>
+          <div class="bento">
+            <article class="tile tile-rate">
+              <p class="tile-figure"><strong>59.9</strong><span>ticks per second</span></p>
+              <p>The Playground cartridge's observed game rate in the emulator, against a target of 60.</p>
+              <div class="tick-strip" aria-hidden="true"></div>
+            </article>
+            <article class="tile tile-heap">
+              <p class="tile-figure"><strong>82<small> KiB</small></strong><span>JavaScript heap</span></p>
+              <p>Shown by the ROM's own HUD. Each square below is 1 KiB of the 512 KiB budget.</p>
+              <div class="heap-map" aria-hidden="true"></div>
+            </article>
+            <article class="tile tile-frame">
+              <p class="tile-figure"><strong>13.29<small> ms</small></strong><span>of a 16.7 ms frame</span></p>
+              <div class="frame-bar" role="img" aria-label="Update takes 0.91 ms and draw takes 12.38 ms of a 16.67 ms frame">
+                <span class="frame-update" style="--share: 5.46%"></span>
+                <span class="frame-draw" style="--share: 74.27%"></span>
+              </div>
+              <p class="frame-legend"><span><i class="swatch-update"></i>update 0.91 ms</span><span><i class="swatch-draw"></i>draw 12.38 ms</span></p>
+            </article>
+            <article class="tile tile-tone">
+              <p class="tile-figure"><strong>660.5<small> Hz</small></strong><span>jump tone</span></p>
+              <p>Measured from captured audio. The script asked for 660 Hz.</p>
+              <svg class="square-wave" viewBox="0 0 240 40" aria-hidden="true"><path d="M0 34 V6 H20 V34 H40 V6 H60 V34 H80 V6 H100 V34 H120 V6 H140 V34 H160 V6 H180 V34 H200 V6 H220 V34 H240"/></svg>
+            </article>
+            <article class="tile tile-touch">
+              <p class="tile-figure"><strong>3</strong><span>frames from tap to orb</span></p>
+              <div class="touch-frames" aria-hidden="true"><span></span><span></span><span class="touch-hit"></span></div>
+              <p>A tap on the touchscreen relocates the orb within three emulated frames.</p>
+            </article>
+            <article class="tile tile-proof">
+              <h3>Change one TypeScript number. Keep every native byte.</h3>
+              <p>A second ROM changed only the movement multiplier from 2 to 3. Holding right for 30 ticks moved the orb 90 pixels instead of 60, and every native source hash stayed the same.</p>
+              <div class="proof-tracks" aria-hidden="true">
+                <div class="proof-track"><code>dx() * 2</code><span class="proof-rail"><i style="--distance: 60"></i></span><b>60 px</b></div>
+                <div class="proof-track"><code>dx() * 3</code><span class="proof-rail"><i style="--distance: 90"></i></span><b>90 px</b></div>
+              </div>
+            </article>
+          </div>
+          <p class="footnote">These figures describe the Playground cartridge in an emulator. Physical hardware has not been verified yet, and the other three cartridges have not been measured in an emulator.</p>
+        </div>
+      </section>
+
+      <section class="section api-section" id="api" aria-labelledby="api-title">
+        <div class="wrap">
+          <header class="section-head">
+            <h2 id="api-title">The whole API fits on one screen.</h2>
+            <p>Every game gets one global object, <code>nds</code>. Its full declarations live in <code>sdk/index.d.ts</code>.</p>
+          </header>
+          <div class="api">
+            <div class="api-menu" role="tablist" aria-label="API groups" id="api-menu"></div>
+            <div class="api-pane" role="tabpanel" id="api-pane" tabindex="0"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section limits-section" id="limits" aria-labelledby="limits-title">
+        <div class="wrap">
+          <header class="section-head">
+            <h2 id="limits-title">What v0.1 does not do yet.</h2>
+            <p>nds-ts is a small 2D engine prototype. These are the edges you will meet first.</p>
+          </header>
+          <div class="spec-plate">
+            <div class="spec">
+              <h3>Graphics</h3>
+              <ul>
+                <li>No hardware sprites, tilemaps or PNG import yet.</li>
+                <li>One built-in 16×16 sprite: the orb.</li>
+                <li>A frame past 1500 top-screen quads stops the game.</li>
+              </ul>
+            </div>
+            <div class="spec">
+              <h3>Code</h3>
+              <ul>
+                <li>One global script per game, with no imports.</li>
+                <li>ES5 at runtime: no <code>Map</code>, <code>Set</code> or <code>Promise</code>.</li>
+                <li>Numbers use software floating point on the DS.</li>
+              </ul>
+            </div>
+            <div class="spec">
+              <h3>Runtime</h3>
+              <ul>
+                <li>512 KiB JavaScript heap, headers included.</li>
+                <li>Watchdogs stop a boot after 500 ms and a callback after 100 ms.</li>
+                <li>A frame that misses VBlank slows the game down.</li>
+              </ul>
+            </div>
+            <div class="spec">
+              <h3>Sound and storage</h3>
+              <ul>
+                <li>One square-wave voice.</li>
+                <li>No save data, music sequencing or networking.</li>
+                <li>Not tested on physical hardware so far.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section start-section" id="start" aria-labelledby="start-title">
+        <div class="wrap start-grid">
+          <header class="section-head">
+            <h2 id="start-title">Build your first ROM.</h2>
+            <p>You need Node.js 22.12 or newer. ROM builds also need Docker, which runs a pinned BlocksDS image with networking turned off.</p>
+          </header>
+          <ol class="steps" id="steps">
+            <li data-lines="0-2"><h3>Install</h3><p>Clone the repository and install the locked dependencies.</p></li>
+            <li data-lines="3"><h3>Preview</h3><p>Opens the browser preview at port 5174.</p></li>
+            <li data-lines="4"><h3>Build the ROM</h3><p>Writes <code>build/nds-ts-demo.nds</code> for an emulator or flashcart.</p></li>
+            <li data-lines="5"><h3>Make it yours</h3><p>Point the same build at your own script.</p></li>
+          </ol>
+          <div class="terminal">
+            <div class="terminal-bar">
+              <span class="terminal-title">Terminal</span>
+              <button class="chip chip-dark" id="copy-commands" type="button" data-icon="copy">Copy</button>
+            </div>
+            <pre class="terminal-body" id="terminal-body"><code><span class="line"><span class="prompt">$</span> git clone https://github.com/jiwonMe/nds-ts.git</span>
+<span class="line"><span class="prompt">$</span> cd nds-ts</span>
+<span class="line"><span class="prompt">$</span> npm ci</span>
+<span class="line"><span class="prompt">$</span> npm run dev</span>
+<span class="line"><span class="prompt">$</span> npm run build</span>
+<span class="line"><span class="prompt">$</span> npm run build -- examples/hinge-breakout/main.ts</span></code></pre>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="wrap footer-grid">
+        <div class="footer-brand">
+          <span data-pixel-text="NDS-TS"></span>
+          <p>Engine code, examples and the bitmap font are MIT licensed. Duktape 2.7.0 is MIT licensed. BlocksDS and libnds are separate build dependencies under their own licenses.</p>
+        </div>
+        <nav class="footer-links" aria-label="Project links">
+          <a href="https://github.com/jiwonMe/nds-ts">Repository</a>
+          <a href="https://github.com/jiwonMe/nds-ts#readme">README</a>
+          <a href="https://github.com/jiwonMe/nds-ts/issues">Issues</a>
+          <a href="https://github.com/jiwonMe/nds-ts/blob/main/LICENSE">License</a>
+        </nav>
+        <p class="footer-note">nds-ts is an independent homebrew tool and is not affiliated with Nintendo. Nintendo DS is a trademark of Nintendo.</p>
+      </div>
+    </footer>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

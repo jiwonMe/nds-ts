@@ -11,5 +11,5 @@
     "noFallthroughCasesInSwitch": true,
     "resolveJsonModule": true
   },
-  "include": ["sdk", "tools", "web", "examples", "tests", "vite.config.ts"]
+  "include": ["sdk", "tools", "web", "site", "examples", "tests", "vite.config.ts"]
 }

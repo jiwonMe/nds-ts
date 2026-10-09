@@ -15,6 +15,9 @@
     "dev": "npm run build:script && vite",
     "build:web": "npm run build:script && vite build",
     "preview": "vite preview",
+    "dev:site": "vite --config site/vite.config.ts",
+    "build:site": "vite build --config site/vite.config.ts",
+    "preview:site": "vite preview --config site/vite.config.ts",
     "build": "sh tools/build-rom.sh",
     "test:native": "sh tools/check-native.sh",
     "test:tools": "python3 -B tests/verify_tools_test.py",
@@ -22,6 +25,9 @@
     "package:source": "node --import tsx tools/package-source.ts"
   },
   "devDependencies": {
+    "@fontsource-variable/m-plus-1-code": "^5.3.0",
+    "@fontsource/dotgothic16": "^5.3.0",
+    "@fontsource/m-plus-rounded-1c": "^5.3.0",
     "@types/node": "^26.6.3",
     "tsx": "^4.23.15",
     "typescript": "5.9.3",

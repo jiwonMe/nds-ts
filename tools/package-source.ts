@@ -10,7 +10,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const output = path.resolve(process.argv[2] ?? path.join(root, 'dist', 'nds-ts-source.tar.gz'));
 const roots = [
   'LICENSE', 'README.md', 'package.json', 'package-lock.json', 'tsconfig.json',
-  'Makefile', '.gitignore', 'vite.config.ts', 'index.html', 'sdk', 'native', 'web', 'examples', 'tools', 'tests', 'vendor',
+  'Makefile', '.gitignore', 'vite.config.ts', 'index.html', 'sdk', 'native', 'web', 'site', 'examples', 'tools', 'tests', 'vendor',
 ];
 const allowedExtension = /\.(?:c|h|cpp|hpp|ts|js|json|md|rst|py|sh|html|css|txt)$/i;
 const ignored = new Set(['.DS_Store', '__pycache__', 'node_modules', 'dist', 'build', '.cache', 'captures']);

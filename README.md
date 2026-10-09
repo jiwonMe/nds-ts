@@ -119,6 +119,33 @@ Browser heap metrics are reported as zero because browsers do not expose the
 Duktape allocator. Browser update/draw timings describe the browser adapter, not
 DS CPU costs. Tone generation is a single voice on both targets.
 
+## More examples
+
+`examples/` holds four games. `dual-screen` is the default demo measured below; the
+others use the same API harder:
+
+| Example | What it shows |
+| --- | --- |
+| `hinge-breakout` | Bricks on the top screen, the paddle on the bottom, and a ball that crosses the hinge gap. |
+| `touch-synth` | A 16-step square-wave sequencer played from the touchscreen. |
+| `pixel-paint` | 16×12 pixel art drawn with the stylus and framed on the top screen. |
+
+Build any of them into a ROM with `npm run build -- examples/<name>/main.ts`. So far only
+`dual-screen` has emulator measurements. `npm test` plays every example for a minute of
+random input and fails if a frame exceeds the 1500-quad top-screen budget.
+
+## Project site
+
+`site/` is the project's landing page. It runs every example on a browser console that
+follows the native renderer's rules (RGB15 colors, the 3×5 font, the 1500-quad top-screen
+budget and the script error screen). Visitors can edit a game and recompile it in the
+browser under the same ES5 checks as `tools/build-script.ts`.
+
+```sh
+npm run dev:site      # http://localhost:5175
+npm run build:site    # dist/site
+```
+
 ## Verification
 
 ```sh
