@@ -1,0 +1,38 @@
+{
+  "name": "@nds-ts/engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Write a Nintendo DS game in TypeScript, preview it in a browser, and compile a real .nds ROM.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "build:script": "node --import tsx tools/build-script.ts",
+    "check": "tsc --noEmit && npm run build:script",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "dev": "npm run build:script && vite",
+    "build:web": "npm run build:script && vite build",
+    "preview": "vite preview",
+    "build": "sh tools/build-rom.sh",
+    "test:native": "sh tools/check-native.sh",
+    "test:tools": "python3 -B tests/verify_tools_test.py",
+    "verify:rom": "python3 -B tools/verify-rom.py build/nds-ts-demo.nds",
+    "package:source": "node --import tsx tools/package-source.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "tsx": "^4.23.15",
+    "typescript": "5.9.3",
+    "vite": "^8.3.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jiwonMe/nds-ts.git"
+  },
+  "homepage": "https://github.com/jiwonMe/nds-ts#readme",
+  "bugs": {
+    "url": "https://github.com/jiwonMe/nds-ts/issues"
+  }
+}

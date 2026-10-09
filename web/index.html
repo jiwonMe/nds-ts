@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#fafafa" />
+    <title>NDS.TS — TypeScript on two screens</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='2' width='24' height='28' rx='6' fill='%23ffffff' stroke='%23151515'/%3E%3Crect x='8' y='6' width='16' height='8' rx='2' fill='%2300bcd4'/%3E%3Crect x='8' y='18' width='16' height='8' rx='2' fill='%23d6008f'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <main class="workspace">
+      <header class="masthead">
+        <a class="brand" href="./" aria-label="NDS.TS home"><span class="brand-icon"><i></i><i></i></span>NDS<span>.TS</span></a>
+        <span class="version"><span></span>ENGINE PROTOTYPE · V0.1</span>
+      </header>
+
+      <section class="playground" aria-label="Dual-screen game playground">
+        <div class="device-wrap">
+          <div class="device">
+            <div class="device-lid">
+              <div class="speaker" aria-hidden="true"><i></i><i></i><i></i></div>
+              <div class="screen-frame"><canvas id="top-screen" width="256" height="192" aria-label="Top game screen: use arrow keys to move and Z or Space to jump"></canvas></div>
+              <div class="speaker" aria-hidden="true"><i></i><i></i><i></i></div>
+            </div>
+            <div class="hinge" aria-hidden="true"><span></span><i></i></div>
+            <div class="device-base">
+              <div class="screen-frame bottom-frame"><canvas id="bottom-screen" width="256" height="192" aria-label="Bottom touch screen: click or tap a position to teleport the orb"></canvas></div>
+              <div class="hardware-controls" aria-label="On-screen game controls">
+                <div class="dpad">
+                  <button class="up" data-button="up" aria-label="D-pad up">↑</button>
+                  <button class="left" data-button="left" aria-label="D-pad left">←</button>
+                  <span></span>
+                  <button class="right" data-button="right" aria-label="D-pad right">→</button>
+                  <button class="down" data-button="down" aria-label="D-pad down">↓</button>
+                </div>
+                <div class="device-label">DUAL SCREEN<br /><span>256 × 192 · 60 HZ</span></div>
+                <div class="face-buttons"><button data-button="b" aria-label="B: change accent color">B</button><button data-button="a" aria-label="A: jump">A</button></div>
+              </div>
+            </div>
+          </div>
+          <div class="playback-controls"><span class="live"><i></i>Browser preview</span><div><button id="sound-toggle" type="button">Enable sound</button><button id="restart" type="button">Restart ↺</button></div></div>
+          <p id="runtime-error" role="alert" hidden></p>
+        </div>
+
+        <aside class="guide">
+          <section class="intro">
+            <span class="eyebrow">A SMALL GAME. A REAL HANDHELD.</span>
+            <h1>TypeScript, meet<br /><span>two screens.</span></h1>
+            <p>One game script, from your browser to a Nintendo DS ROM. Move the orb, try a jump, and tap the bottom screen to take a shortcut.</p>
+          </section>
+          <div class="control-list">
+            <div><span class="control-icon">↔</span><div><strong>Move around</strong><p><kbd>←</kbd> <kbd>→</kbd> or <kbd>A</kbd> <kbd>D</kbd></p></div></div>
+            <div><span class="control-icon">↑</span><div><strong>Hop a little</strong><p><kbd>Z</kbd> or <kbd>Space</kbd> · DS button A</p></div></div>
+            <div><span class="control-icon color-icon">●</span><div><strong>Find your color</strong><p><kbd>X</kbd> · DS button B</p></div></div>
+            <div><span class="control-icon">⌖</span><div><strong>Take a shortcut</strong><p>Click or tap the lower screen to teleport.</p></div></div>
+          </div>
+          <div class="runtime-card"><span class="eyebrow">LIVE RUNTIME</span><div class="metrics"><div><strong id="metric-frame">0</strong><span>frames</span></div><div><strong id="metric-update">0</strong><span>update µs</span></div><div><strong id="metric-draw">0</strong><span>draw µs</span></div></div><p>The ROM reports its JavaScript heap on the lower screen. Browser heap reads as 0.</p></div>
+          <div class="code-card"><span class="eyebrow">START WITH A FEW LINES</span><pre><code><span>var</span> x = 120;
+<span>var</span> game: NDSGame = {
+  update: <span>function</span> () {
+    x += nds.input.dx() * 2;
+  },
+  draw: <span>function</span> () {
+    nds.top.clear(0xFFFFFF);
+    nds.top.sprite('orb', x, 138);
+  }
+};</code></pre><p>Edit <code>examples/dual-screen/main.ts</code> to make it yours.</p></div>
+        </aside>
+      </section>
+      <footer>BUILT FOR CURIOUS MAKERS <span>TYPESCRIPT → ES5 → NINTENDO DS</span></footer>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
