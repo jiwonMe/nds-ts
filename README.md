@@ -139,7 +139,8 @@ random input and fails if a frame exceeds the 1500-quad top-screen budget.
 `site/` is the project's landing page. It runs every example on a browser console that
 follows the native renderer's rules (RGB15 colors, the 3×5 font, the 1500-quad top-screen
 budget and the script error screen). Visitors can edit a game and recompile it in the
-browser under the same ES5 checks as `tools/build-script.ts`.
+browser under the same ES5 checks as `tools/build-script.ts`. It is live at
+<https://nds-ts.vercel.app>, built on Vercel from `vercel.json`.
 
 ```sh
 npm run dev:site      # http://localhost:5175

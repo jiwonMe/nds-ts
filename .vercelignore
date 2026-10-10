@@ -1,0 +1,14 @@
+# Vercel only builds the project site (npm run build:site); keep local outputs out of the upload.
+node_modules
+build
+gen
+dist
+captures
+.cache
+*.tgz
+*.log
+.claude
+pnpm-lock.yaml
+pnpm-workspace.yaml
+.vercel
+.env*
