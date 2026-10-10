@@ -7,19 +7,19 @@ import { BrowserConsole, type Program } from './console.js';
 import { Device, fitDevice } from './device.js';
 import { Editor } from './editor.js';
 import { insertSplash, safetyNotice } from './firmware.js';
+import { mountHandheld } from './handheld.js';
 import { icon, type IconName } from './icons.js';
-import { pixelText } from './pixel-font.js';
 
 const $ = <T extends HTMLElement = HTMLElement>(selector: string) => document.querySelector<T>(selector)!;
 const number = (value: number) => value.toLocaleString('en-US');
 const bytesOf = (text: string) => new TextEncoder().encode(text).length;
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-for (const element of document.querySelectorAll<HTMLElement>('[data-pixel-text]')) {
-  element.innerHTML = pixelText(element.dataset.pixelText!);
-}
 for (const element of document.querySelectorAll<HTMLElement>('[data-icon]')) {
   element.insertAdjacentHTML('afterbegin', icon(element.dataset.icon as IconName));
+}
+for (const element of document.querySelectorAll<HTMLElement>('[data-icon-after]')) {
+  element.outerHTML = icon(element.dataset.iconAfter as IconName);
 }
 
 /* ---------- Console ---------- */
@@ -50,6 +50,7 @@ const machine = new BrowserConsole(screens, {
 });
 
 const hint = $('#keyboard-hint');
+mountHandheld(ds);
 const device = new Device(ds, machine, (active) => {
   host.classList.toggle('ds-host-keyboard', active);
   hint.textContent = active ? 'Keyboard on: arrows, Z, X, C, V, Q, E, Enter and Shift.' : 'Click the console to play with your keyboard.';
@@ -119,7 +120,6 @@ for (const info of CARTRIDGES) {
       <span class="cart-shell">
         <svg class="cart-outline" viewBox="0 0 66 70" preserveAspectRatio="none" aria-hidden="true">
           <path class="cart-body" d="M5 1H51L65 15V65Q65 69 61 69H5Q1 69 1 65V5Q1 1 5 1Z"/>
-          <path class="cart-grip" d="M9 5V10M13 5V10M17 5V10M21 5V10M25 5V10M29 5V10M33 5V10M37 5V10"/>
         </svg>
         <canvas class="cart-label" width="256" height="192" aria-hidden="true"></canvas>
       </span>
@@ -215,7 +215,15 @@ $('#lid-toggle').addEventListener('click', () => {
   if (lidOpen) closeLid();
   else openLid(!powered);
 });
-$('.ds-hinge').addEventListener('click', () => (lidOpen ? closeLid() : openLid(!powered)));
+// The hinge's ends are L and R; the rest of it opens and closes the lid, as does the folded lid.
+$('.ds-hinge').addEventListener('click', (event) => {
+  if ((event.target as Element).closest('[data-button]')) return;
+  if (lidOpen) closeLid();
+  else openLid(!powered);
+});
+$('.ds-lid').addEventListener('click', () => {
+  if (!lidOpen) openLid(!powered);
+});
 $('#reset-console').addEventListener('click', () => {
   if (!lidOpen) openLid(false);
   powered = true;
@@ -293,8 +301,7 @@ function escapeHtml(text: string): string {
 }
 
 /* ---------- Measurements ---------- */
-$('.tick-strip').innerHTML = '<i class="lit"></i>'.repeat(60);
-$('.heap-map').innerHTML = '<i class="used"></i>'.repeat(82) + '<i></i>'.repeat(512 - 82);
+$('.tick-ruler').innerHTML = '<i></i>'.repeat(60);
 
 /* ---------- Quick start ---------- */
 const lines = [...document.querySelectorAll<HTMLElement>('#terminal-body .line')];

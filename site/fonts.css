@@ -1,36 +1,15 @@
-/* Fonts are self-hosted from @fontsource (OFL-1.1), Latin subsets only. */
+/* Geist and Geist Mono, self-hosted from @fontsource-variable (OFL-1.1), Latin subset only. */
 @font-face {
-  font-family: 'DotGothic16';
+  font-family: 'Geist';
   font-style: normal;
-  font-weight: 400;
+  font-weight: 100 900;
   font-display: swap;
-  src: url('../node_modules/@fontsource/dotgothic16/files/dotgothic16-latin-400-normal.woff2') format('woff2');
+  src: url('../node_modules/@fontsource-variable/geist/files/geist-latin-wght-normal.woff2') format('woff2-variations');
 }
 @font-face {
-  font-family: 'M PLUS Rounded 1c';
+  font-family: 'Geist Mono';
   font-style: normal;
-  font-weight: 400;
+  font-weight: 100 900;
   font-display: swap;
-  src: url('../node_modules/@fontsource/m-plus-rounded-1c/files/m-plus-rounded-1c-latin-400-normal.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'M PLUS Rounded 1c';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url('../node_modules/@fontsource/m-plus-rounded-1c/files/m-plus-rounded-1c-latin-500-normal.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'M PLUS Rounded 1c';
-  font-style: normal;
-  font-weight: 800;
-  font-display: swap;
-  src: url('../node_modules/@fontsource/m-plus-rounded-1c/files/m-plus-rounded-1c-latin-800-normal.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'M PLUS 1 Code';
-  font-style: normal;
-  font-weight: 100 700;
-  font-display: swap;
-  src: url('../node_modules/@fontsource-variable/m-plus-1-code/files/m-plus-1-code-latin-wght-normal.woff2') format('woff2-variations');
+  src: url('../node_modules/@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2') format('woff2-variations');
 }

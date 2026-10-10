@@ -1,4 +1,5 @@
 import type { BrowserConsole } from './console.js';
+import { applyLayout, GEOMETRY, type Layout } from './handheld.js';
 
 const KEYS: Record<string, NDSButton> = {
   ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down',
@@ -15,7 +16,8 @@ const PAD: [number, NDSButton][] = [
 /** Connects the handheld's DOM to the console: buttons, D-pad, touchscreen,
  * keyboard while the handheld has focus, and any connected gamepad. */
 export class Device {
-  private readonly buttons: HTMLElement[];
+  private readonly buttons: SVGElement[];
+  private readonly dpads: SVGElement[];
   private readonly pressed = new Set<NDSButton>();
   private readonly padState = new Map<string, NDSButton>();
 
@@ -24,12 +26,21 @@ export class Device {
     private readonly console: BrowserConsole,
     onFocus: (active: boolean) => void,
   ) {
-    this.buttons = [...root.querySelectorAll<HTMLElement>('[data-button]')];
+    // Each layout draws its own controls; only the visible set ever gets a pointer.
+    this.buttons = [...root.querySelectorAll<SVGElement>('[data-button]')];
+    this.dpads = [...root.querySelectorAll<SVGElement>('.ds-dpad')];
     for (const button of this.buttons) if (!button.closest('.ds-dpad')) this.bindButton(button);
-    this.bindDpad(root.querySelector<HTMLElement>('.ds-dpad')!);
+    for (const dpad of this.dpads) this.bindDpad(dpad);
     this.addTouchSurface(root.querySelector<HTMLCanvasElement>('#screen-bottom')!, root);
     this.addKeyboardTarget(root, onFocus);
-    root.addEventListener('pointerdown', () => root.focus({ preventScroll: true }));
+    // A click focuses the handheld for the keyboard; the mark keeps the focus ring for Tab.
+    root.addEventListener('pointerdown', () => {
+      root.dataset.pointerFocus = '';
+      root.focus({ preventScroll: true });
+    });
+    root.addEventListener('focusout', (event) => {
+      if (!root.contains(event.relatedTarget as Node | null)) delete root.dataset.pointerFocus;
+    });
     window.addEventListener('blur', () => console.releaseAll());
   }
 
@@ -43,14 +54,18 @@ export class Device {
     for (const element of this.buttons) {
       element.toggleAttribute('data-pressed', held.has(element.dataset.button as NDSButton));
     }
-    const dpad = this.root.querySelector<HTMLElement>('.ds-dpad')!;
-    const tiltX = (held.has('up') ? 1 : 0) - (held.has('down') ? 1 : 0);
-    const tiltY = (held.has('right') ? 1 : 0) - (held.has('left') ? 1 : 0);
-    dpad.style.setProperty('--tilt', `rotateX(${tiltX * 9}deg) rotateY(${tiltY * 9}deg)`);
+    // The cross rocks toward the arms that are down.
+    const x = (held.has('right') ? 1 : 0) - (held.has('left') ? 1 : 0);
+    const y = (held.has('down') ? 1 : 0) - (held.has('up') ? 1 : 0);
+    for (const dpad of this.dpads) {
+      dpad.style.setProperty('--dpad-x', String(x));
+      dpad.style.setProperty('--dpad-y', String(y));
+    }
   }
 
-  private bindButton(element: HTMLElement): void {
+  private bindButton(element: SVGElement): void {
     const name = element.dataset.button as NDSButton;
+    holdTouches(element);
     element.addEventListener('pointerdown', (event) => {
       if (event.button !== 0) return;
       event.preventDefault();
@@ -66,8 +81,9 @@ export class Device {
   }
 
   /** One pointer drives both axes, so sliding a thumb across gives diagonals. */
-  private bindDpad(dpad: HTMLElement): void {
+  private bindDpad(dpad: SVGElement): void {
     let pointer: number | null = null;
+    holdTouches(dpad);
     const steer = (event: PointerEvent) => {
       const bounds = dpad.getBoundingClientRect();
       const dx = (event.clientX - bounds.left) / bounds.width * 2 - 1;
@@ -172,22 +188,28 @@ export class Device {
   }
 }
 
-/** Sizes the handheld so one DS pixel covers whole device pixels when it can. */
+/** Keeps a touch that starts on a control from scrolling the page, for
+ * browsers that ignore touch-action on SVG shapes. */
+function holdTouches(element: Element): void {
+  element.addEventListener('touchstart', (event) => event.preventDefault(), { passive: false });
+}
+
+/** Picks a layout and sizes the handheld so one DS pixel covers whole device pixels when it can. */
 export function fitDevice(host: HTMLElement, root: HTMLElement, frame: HTMLElement): void {
   const style = getComputedStyle(frame);
   const width = frame.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
   const stacked = window.matchMedia('(max-width: 1080px)').matches;
   const available = stacked ? width : width * 0.5;
-  const wide = available >= 368 * 1.12;
-  const units = wide ? { width: 368, height: 482 } : { width: 280, height: 540 };
-  let scale = available / units.width;
-  // Leave room for the sticky navigation and the hero's top padding.
-  if (!stacked) scale = Math.min(scale, (window.innerHeight - 136) / units.height);
-  scale = Math.min(scale, stacked ? 1.75 : 2.25);
+  // The real proportions need about a CSS pixel per DS pixel; narrower, the controls go below.
+  const layout: Layout = available >= GEOMETRY.wide.width * 0.9 ? 'wide' : 'compact';
+  const size = GEOMETRY[layout];
+  let scale = available / size.width;
+  // Keep the open handheld inside the window, below the sticky navigation.
+  scale = Math.min(scale, (window.innerHeight - (stacked ? 96 : 136)) / (size.lid + size.hinge + size.base), 2);
   const ratio = window.devicePixelRatio || 1;
   const snapped = Math.floor(scale * ratio) / ratio;
   if (snapped >= scale * 0.9) scale = snapped;
-  scale = Math.max(scale, 0.7);
+  scale = Math.max(scale, 0.6);
   host.style.setProperty('--px', scale.toFixed(4));
-  root.dataset.layout = wide ? 'wide' : 'compact';
+  applyLayout(host, root, layout);
 }

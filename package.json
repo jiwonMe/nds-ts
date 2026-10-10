@@ -25,9 +25,8 @@
     "package:source": "node --import tsx tools/package-source.ts"
   },
   "devDependencies": {
-    "@fontsource-variable/m-plus-1-code": "^5.3.0",
-    "@fontsource/dotgothic16": "^5.3.0",
-    "@fontsource/m-plus-rounded-1c": "^5.3.0",
+    "@fontsource-variable/geist": "^5.3.0",
+    "@fontsource-variable/geist-mono": "^5.3.0",
     "@types/node": "^26.6.3",
     "tsx": "^4.23.15",
     "typescript": "5.9.3",
